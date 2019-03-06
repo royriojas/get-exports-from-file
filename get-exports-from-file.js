@@ -1,14 +1,19 @@
-const babylon = require('babylon')
+const babylon = require('@babel/parser')
 const fs = require('mz/fs')
-const traverse = require('babel-traverse').default
+const traverse = require('@babel/traverse').default
 const makeUpImportDefaultName = require('./lib/make-up-import-default-name')
 
 const parse = (filePath) => {
   return fs.readFile(filePath, 'utf8').then((code) => {
-    return babylon.parse(code, {
-      sourceType: 'module',
-      plugins: ['*']
-    })
+    try {
+      return babylon.parse(code, {
+        sourceType: 'module',
+        plugins: ['*', 'decorators-legacy', 'optionalChaining', 'estree', 'jsx', 'typescript', 'classProperties', 'objectRestSpread']
+      })
+    } catch (err) {
+      console.error('[get-exports-from-file]: error', err)
+      throw err
+    }
   })
 }
 
@@ -75,9 +80,9 @@ module.exports = {
               if (!foundADefault && node.expression.left.property.name === 'default') {
                 foundADefault = true
                 // console.log('A', node.expression)
-
+                const rightName = (node.expression.right || {}).name
                 return exported.push({
-                  name: makeUpImportDefaultName(node.expression.right, filePath),
+                  name: rightName || makeUpImportDefaultName(node.expression.right, filePath),
                   default: true
                 })
               } else {
@@ -100,7 +105,6 @@ module.exports = {
                 }
                 foundADefault = true
                 // console.log('C', node.expression)
-
                 return exported.push({
                   name: right.name || makeUpImportDefaultName(right, filePath),
                   default: true
@@ -117,4 +121,3 @@ module.exports = {
     })
   }
 }
-
