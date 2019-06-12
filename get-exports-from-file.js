@@ -8,7 +8,7 @@ const parse = (filePath) => {
     try {
       return babylon.parse(code, {
         sourceType: 'module',
-        plugins: ['*', 'decorators-legacy', 'optionalChaining', 'estree', 'jsx', 'typescript', 'classProperties', 'classPrivateProperties', 'classPrivateMethods', 'objectRestSpread']
+        plugins: ['*', 'decorators-legacy', 'optionalChaining', 'estree', 'jsx', 'typescript', 'classProperties', 'classPrivateProperties', 'classPrivateMethods', 'objectRestSpread', 'doExpressions']
       })
     } catch (err) {
       console.error('[get-exports-from-file]: error', filePath, err)
