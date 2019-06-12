@@ -21,11 +21,14 @@ module.exports = {
   es6 (filePath) {
     return parse(filePath).then((tree) => {
       const exported = []
+      const imported = []
+
       tree.program.body.forEach((node) => {
         const {type} = node
         if (type === 'ExportNamedDeclaration') {
           let name
           if (node.declaration) {
+            // normal named export
             if (node.declaration.declarations) {
               name = node.declaration.declarations[0].id.name
             } else if (node.declaration.id) {
@@ -34,14 +37,22 @@ module.exports = {
             exported.push({
               name
             })
+            // export { named } from './some/module'
           } else if (node.specifiers) {
             node.specifiers.forEach((specifier) => {
               exported.push({
                 name: specifier.exported.name
               })
+              imported.push({
+                name: specifier.local.name,
+                module: (node.source || {}).value,
+                type: specifier.type,
+              });
             })
           }
-        } else if (type === 'ExportDefaultDeclaration') {
+        }
+
+        if (type === 'ExportDefaultDeclaration') {
           let {name} = node.declaration
 
           if (!name) {
@@ -56,9 +67,20 @@ module.exports = {
             default: true
           })
         }
+
+        if (type === 'ImportDeclaration') {
+          node.specifiers.forEach(specifier => {
+            imported.push({
+              name: (specifier.local || {}).name,
+              module: (node.source || {}).value,
+              type: specifier.type
+            })
+          });
+        }
       })
 
       return {
+        imported,
         exported,
         ast: tree
       }
