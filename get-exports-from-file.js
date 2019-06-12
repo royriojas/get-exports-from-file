@@ -8,7 +8,7 @@ const parse = (filePath) => {
     try {
       return babylon.parse(code, {
         sourceType: 'module',
-        plugins: ['*', 'decorators-legacy', 'optionalChaining', 'estree', 'jsx', 'typescript', 'classProperties', 'classPrivateProperties', 'classPrivateMethods', 'objectRestSpread', 'doExpressions']
+        plugins: ['*', 'decorators-legacy', 'optionalChaining', 'estree', 'jsx', 'typescript', 'classProperties', 'classPrivateProperties', 'classPrivateMethods', 'objectRestSpread', 'doExpressions', 'exportDefaultFrom', 'exportNamespaceFrom']
       })
     } catch (err) {
       console.error('[get-exports-from-file]: error', filePath, err)
@@ -43,11 +43,14 @@ module.exports = {
               exported.push({
                 name: specifier.exported.name
               })
-              imported.push({
-                name: specifier.local.name,
-                module: (node.source || {}).value,
-                type: specifier.type,
-              });
+              if (specifier.imported && node.source) {
+                imported.push({
+                  name: specifier.imported.name,
+                  module: node.source.value,
+                  nodeType: node.type,
+                  type: specifier.type,
+                });
+              }
             })
           }
         }
@@ -71,8 +74,9 @@ module.exports = {
         if (type === 'ImportDeclaration') {
           node.specifiers.forEach(specifier => {
             imported.push({
-              name: (specifier.local || {}).name,
+              name: (specifier.imported || {}).name,
               module: (node.source || {}).value,
+              nodeType: node.type,
               type: specifier.type
             })
           });
