@@ -57,16 +57,19 @@ module.exports = {
 
         if (type === 'ExportDefaultDeclaration') {
           let {name} = node.declaration
+          let inferred = false;
 
           if (!name) {
             if (node.declaration.type === 'ClassDeclaration') {
               name = node.declaration.id.name
             } else {
               name = makeUpImportDefaultName(node, filePath)
+              inferred = true;
             }
           }
           exported.push({
             name: name,
+            inferred,
             default: true
           })
         }
