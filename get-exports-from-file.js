@@ -76,8 +76,14 @@ module.exports = {
 
         if (type === 'ImportDeclaration') {
           node.specifiers.forEach(specifier => {
+            let name = (specifier.imported || {}).name;
+
+            if (specifier.type === 'ImportDefaultSpecifier') {
+              name = (specifier.local || {}).name;
+            }
+
             imported.push({
-              name: (specifier.imported || {}).name,
+              name,
               module: (node.source || {}).value,
               nodeType: node.type,
               type: specifier.type

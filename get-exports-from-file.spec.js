@@ -216,3 +216,19 @@ test('mobx', async t => {
     return !!entryByName
   }), true)
 })
+
+test('typescript', async t => {
+  const exp = await getExportsFromFile.es6('./fixtures/ts-example.ts');
+  t.deepEqual(exp.exported, [ { name: 'IBuildReportParameters' }, { name: 'variable' } ]);
+  t.deepEqual(exp.imported,
+    [
+      { name: 'get',
+        module: 'lodash/get',
+        nodeType: 'ImportDeclaration',
+        type: 'ImportDefaultSpecifier' },
+      { name: 'parsePropertyCriteria',
+        module: 'screening-report-parser',
+        nodeType: 'ImportDeclaration',
+        type: 'ImportSpecifier' }
+    ]);
+});
