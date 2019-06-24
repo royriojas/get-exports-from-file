@@ -8,7 +8,7 @@ test('basic', async t => {
   const exp = await getExportsFromFile.es6('fixtures/basic.js')
   t.deepEqual(exp.exported, [
     {name: 'statelessComponent'},
-    {name: 'ShoppingList', default: true}
+    {name: 'ShoppingList', default: true, inferred: false }
     // {name: 'statelessComponentNotExported', exported: false},
   ])
 })
@@ -28,7 +28,7 @@ test('export as', async t => {
     { name: 'b' },
     { name: 'd' },
     { name: 'e' },
-    { name: 'exportAs', default: true }
+    { name: 'exportAs', default: true, inferred: true }
     // {name: 'statelessComponentNotExported', exported: false},
   ])
 })
@@ -36,7 +36,7 @@ test('export as', async t => {
 test('classname', async t => {
   const exp = await getExportsFromFile.es6('fixtures/classname.js')
   t.deepEqual(exp.exported, [
-    { name: 'ShoppingList', default: true }
+    { name: 'ShoppingList', default: true, inferred: false }
   ])
 })
 
@@ -50,14 +50,14 @@ test('named function', async t => {
 test('index inherits a name from parent dir', async t => {
   const exp = await getExportsFromFile.es6('fixtures/index.js')
   t.deepEqual(exp.exported, [
-    { name: 'fixtures', default: true }
+    { name: 'fixtures', default: true, inferred: true }
   ])
 })
 
 test('capitalize when JSX', async t => {  // JSX components cannot appear with a lowercase first letter
   const exp = await getExportsFromFile.es6('fixtures/should-get-capitalized.js')
   t.deepEqual(exp.exported, [
-    { name: 'ShouldGetCapitalized', default: true }
+    { name: 'ShouldGetCapitalized', default: true, inferred: true }
   ])
 })
 
