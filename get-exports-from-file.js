@@ -80,8 +80,8 @@ module.exports = {
           const subPath = require.resolve(path.resolve(path.dirname(filePath), (node.source || {}).value))
           const all = await module.exports.es6(subPath)
 
-          all.imported.forEach(i => imported.push(i))
-          all.exported.forEach(e => exported.push(e))
+          all.imported.filter(i => !i.default).forEach(i => imported.push(i))
+          all.exported.filter(e => !e.default).forEach(e => exported.push(e))
         }
 
         if (type === 'ImportDeclaration') {
