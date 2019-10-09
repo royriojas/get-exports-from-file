@@ -1,5 +1,6 @@
 const babylon = require('@babel/parser')
 const fs = require('mz/fs')
+const path = require('path')
 const traverse = require('@babel/traverse').default
 const makeUpImportDefaultName = require('./lib/make-up-import-default-name')
 
@@ -18,12 +19,13 @@ const parse = (filePath) => {
 }
 
 module.exports = {
-  es6 (filePath) {
-    return parse(filePath).then((tree) => {
-      const exported = []
-      const imported = []
+  es6: async function(filePath) {
+    const tree = await parse(filePath)
+    const exported = []
+    const imported = []
 
-      tree.program.body.forEach((node) => {
+    await Promise.all(
+      tree.program.body.map(async (node) => {
         const {type} = node
         if (type === 'ExportNamedDeclaration') {
           let name
@@ -74,6 +76,14 @@ module.exports = {
           })
         }
 
+        if (type === 'ExportAllDeclaration') {
+          const subPath = require.resolve(path.resolve(path.dirname(filePath), (node.source || {}).value))
+          const all = await module.exports.es6(subPath)
+
+          all.imported.filter(i => !i.default).forEach(i => imported.push(i))
+          all.exported.filter(e => !e.default).forEach(e => exported.push(e))
+        }
+
         if (type === 'ImportDeclaration') {
           node.specifiers.forEach(specifier => {
             let name = (specifier.imported || {}).name;
@@ -91,13 +101,13 @@ module.exports = {
           });
         }
       })
+    )
 
-      return {
-        imported,
-        exported,
-        ast: tree
-      }
-    })
+    return {
+      imported,
+      exported,
+      ast: tree
+    }
   },
   cjs (filePath) {
     return parse(filePath).then((tree) => {
