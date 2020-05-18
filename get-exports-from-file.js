@@ -19,7 +19,7 @@ const parse = (filePath) => {
 }
 
 module.exports = {
-  es6: async function (filePath) {
+  es6: async function (filePath, options) {
     const tree = await parse(filePath)
     const exported = []
     const imported = []
@@ -48,6 +48,11 @@ module.exports = {
               if (specifier.local && specifier.local.name && specifier.local.name !== exportEntry.name) {
                 exportEntry.localName = specifier.local.name
               }
+
+              if (node.source) {
+                exportEntry.module = node.source.value;
+              }
+
               exported.push(exportEntry)
 
               if (specifier.imported && node.source) {

@@ -51,6 +51,25 @@ test('named function', async t => {
 test('all from another file, expect default', async t => {
   const exp = await getExportsFromFile.es6('fixtures/all.js')
   t.deepEqual(exp.exported, [
+    {
+      localName: 'b',
+      name: 'x',
+    },
+    {
+      localName: 'a',
+      module: './some-module',
+      name: 'b',
+    },
+    {
+      localName: 'c',
+      module: './other-module',
+      name: 'foo',
+    },
+    {
+      localName: 'w',
+      module: './other-module',
+      name: 'other',
+    },
     { name: 'namedFn' }
   ])
 })
