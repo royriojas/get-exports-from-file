@@ -19,14 +19,14 @@ const parse = (filePath) => {
 }
 
 module.exports = {
-  es6: async function(filePath) {
+  es6: async function (filePath) {
     const tree = await parse(filePath)
     const exported = []
     const imported = []
 
     await Promise.all(
       tree.program.body.map(async (node) => {
-        const {type} = node
+        const { type } = node
         if (type === 'ExportNamedDeclaration') {
           let name
           if (node.declaration) {
@@ -42,31 +42,36 @@ module.exports = {
             // export { named } from './some/module'
           } else if (node.specifiers) {
             node.specifiers.forEach((specifier) => {
-              exported.push({
+              const exportEntry = {
                 name: specifier.exported.name
-              })
+              }
+              if (specifier.local && specifier.local.name && specifier.local.name !== exportEntry.name) {
+                exportEntry.localName = specifier.local.name
+              }
+              exported.push(exportEntry)
+
               if (specifier.imported && node.source) {
                 imported.push({
                   name: specifier.imported.name,
                   module: node.source.value,
                   nodeType: node.type,
-                  type: specifier.type,
-                });
+                  type: specifier.type
+                })
               }
             })
           }
         }
 
         if (type === 'ExportDefaultDeclaration') {
-          let {name} = node.declaration
-          let inferred = false;
+          let { name } = node.declaration
+          let inferred = false
 
           if (!name) {
             if (node.declaration.type === 'ClassDeclaration') {
               name = node.declaration.id.name
             } else {
               name = makeUpImportDefaultName(node, filePath)
-              inferred = true;
+              inferred = true
             }
           }
           exported.push({
@@ -86,10 +91,10 @@ module.exports = {
 
         if (type === 'ImportDeclaration') {
           node.specifiers.forEach(specifier => {
-            let name = (specifier.imported || {}).name;
+            let name = (specifier.imported || {}).name
 
             if (specifier.type === 'ImportDefaultSpecifier') {
-              name = (specifier.local || {}).name;
+              name = (specifier.local || {}).name
             }
 
             imported.push({
@@ -98,7 +103,7 @@ module.exports = {
               nodeType: node.type,
               type: specifier.type
             })
-          });
+          })
         }
       })
     )
@@ -115,7 +120,7 @@ module.exports = {
 
       let foundADefault = false
       traverse.cheap(tree.program, (node) => {
-        const {type} = node
+        const { type } = node
         if (type === 'ExpressionStatement') {
           if (node.expression.type === 'AssignmentExpression') {
             if (node.expression.left.object && node.expression.left.object.name === 'exports') {
@@ -131,20 +136,20 @@ module.exports = {
                   default: true
                 })
               } else {
-                const {right} = node.expression
+                const { right } = node.expression
                 if (right.type === 'CallExpression' && right.callee && right.callee.name === 'factory') {
                   return // skip this, because it's most likely a UMD defintion garbage
                 }
                 // console.log('B', node.expression)
 
-                const {property} = node.expression.left
+                const { property } = node.expression.left
                 return exported.push({
                   name: property.name || property.value
                 })
               }
             } else if (node.expression.left.object && node.expression.left.property) {
               if (!foundADefault && node.expression.left.object.name === 'module' && node.expression.left.property.name === 'exports') {
-                const {right} = node.expression
+                const { right } = node.expression
                 if (right.type === 'CallExpression' && right.callee && right.callee.name === 'factory') {
                   return // skip this, because it's most likely a UMD defintion garbage
                 }

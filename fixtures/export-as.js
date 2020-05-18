@@ -12,3 +12,6 @@ export default {
 }
 
 
+export const c = 3;
+
+export { c as w };

@@ -7,8 +7,8 @@ require('@babel/polyfill')
 test('basic', async t => {
   const exp = await getExportsFromFile.es6('fixtures/basic.js')
   t.deepEqual(exp.exported, [
-    {name: 'statelessComponent'},
-    {name: 'ShoppingList', default: true, inferred: false }
+    { name: 'statelessComponent' },
+    { name: 'ShoppingList', default: true, inferred: false }
     // {name: 'statelessComponentNotExported', exported: false},
   ])
 })
@@ -16,20 +16,21 @@ test('basic', async t => {
 test('flow', async t => {
   const exp = await getExportsFromFile.es6('fixtures/flow.js')
   t.deepEqual(exp.exported, [
-    {name: 'DateRange'},
-    {name: 'DateInterval'},
-    {name: 'DateIntervalFlag'}
+    { name: 'DateRange' },
+    { name: 'DateInterval' },
+    { name: 'DateIntervalFlag' }
   ])
 })
 
 test('export as', async t => {
   const exp = await getExportsFromFile.es6('fixtures/export-as.js')
   t.deepEqual(exp.exported, [
-    { name: 'b' },
+    { name: 'b', localName: 'a' },
     { name: 'd' },
     { name: 'e' },
-    { name: 'exportAs', default: true, inferred: true }
-    // {name: 'statelessComponentNotExported', exported: false},
+    { name: 'exportAs', default: true, inferred: true },
+    { name: 'c' },
+    { name: 'w', localName: 'c' }
   ])
 })
 
@@ -61,7 +62,7 @@ test('index inherits a name from parent dir', async t => {
   ])
 })
 
-test('capitalize when JSX', async t => {  // JSX components cannot appear with a lowercase first letter
+test('capitalize when JSX', async t => { // JSX components cannot appear with a lowercase first letter
   const exp = await getExportsFromFile.es6('fixtures/should-get-capitalized.js')
   t.deepEqual(exp.exported, [
     { name: 'ShouldGetCapitalized', default: true, inferred: true }
@@ -225,17 +226,21 @@ test('mobx', async t => {
 })
 
 test('typescript', async t => {
-  const exp = await getExportsFromFile.es6('./fixtures/ts-example.ts');
-  t.deepEqual(exp.exported, [ { name: 'IBuildReportParameters' }, { name: 'variable' } ]);
+  const exp = await getExportsFromFile.es6('./fixtures/ts-example.ts')
+  t.deepEqual(exp.exported, [{ name: 'IBuildReportParameters' }, { name: 'variable' }])
   t.deepEqual(exp.imported,
     [
-      { name: 'get',
+      {
+        name: 'get',
         module: 'lodash/get',
         nodeType: 'ImportDeclaration',
-        type: 'ImportDefaultSpecifier' },
-      { name: 'parsePropertyCriteria',
+        type: 'ImportDefaultSpecifier'
+      },
+      {
+        name: 'parsePropertyCriteria',
         module: 'screening-report-parser',
         nodeType: 'ImportDeclaration',
-        type: 'ImportSpecifier' }
-    ]);
-});
+        type: 'ImportSpecifier'
+      }
+    ])
+})
