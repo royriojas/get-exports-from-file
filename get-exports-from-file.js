@@ -50,7 +50,11 @@ module.exports = {
               }
 
               if (node.source) {
-                exportEntry.module = node.source.value;
+                exportEntry.module = node.source.value
+              }
+
+              if (specifier.type === 'ExportDefaultSpecifier') {
+                exportEntry.default = true
               }
 
               exported.push(exportEntry)

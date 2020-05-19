@@ -7,3 +7,4 @@ export { b as x };
 
 export { a as b } from './some-module';
 export { c as foo, w as other } from './other-module';
+export def from './default';

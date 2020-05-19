@@ -53,22 +53,27 @@ test('all from another file, expect default', async t => {
   t.deepEqual(exp.exported, [
     {
       localName: 'b',
-      name: 'x',
+      name: 'x'
     },
     {
       localName: 'a',
       module: './some-module',
-      name: 'b',
+      name: 'b'
     },
     {
       localName: 'c',
       module: './other-module',
-      name: 'foo',
+      name: 'foo'
     },
     {
       localName: 'w',
       module: './other-module',
-      name: 'other',
+      name: 'other'
+    },
+    {
+      default: true,
+      module: './default',
+      name: 'def'
     },
     { name: 'namedFn' }
   ])
